@@ -21,6 +21,15 @@ export default function Home() {
     const [userId, setUserId] = useState<string>('user123'); // Simulate user ID
     const [processedImages, setProcessedImages] = useState<string[]>([]);
 
+    const handleUserIdChange = (newUserId: string) => {
+        if (newUserId !== userId && (currentJobId || processedImages.length > 0)) {
+            console.log(`Switching user from "${userId}" to "${newUserId}" - clearing session data`);
+        }
+        setUserId(newUserId);
+        setCurrentJobId('');
+        setProcessedImages([]);
+    };
+
     const handleJobCreated = useCallback((newJobId: string) => {
         setCurrentJobId(newJobId);
         setProcessedImages([]); // Clear previous results
@@ -51,7 +60,7 @@ export default function Home() {
                     <input
                         type="text"
                         value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
+                        onChange={(e) => handleUserIdChange(e.target.value)}
                         className="border rounded px-3 py-2 w-64"
                         placeholder="Enter user ID"
                     />
