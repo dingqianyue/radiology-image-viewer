@@ -121,7 +121,7 @@ pip install -r requirements.txt
 # Open a new terminal
 cd radiology-frontend
 
-# Install dependencies
+# Install dependencies (this will take ~5 minutes, please be patient)
 npm install
 ```
 
