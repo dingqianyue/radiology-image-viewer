@@ -52,12 +52,10 @@ export default function NiftiViewer({ fileUrl }: NiftiViewerProps) {
         <div className="w-full">
             <canvas
                 ref={canvasRef}
-                width={600}
-                height={600}
-                className="border rounded max-w-full"
+                className="border rounded w-full aspect-square"
             />
             <div className="mt-2 text-sm text-gray-600">
-                <p>💡 Tip: Click and drag to navigate through slices</p>
+                <p>Tip: Click and drag to navigate through slices</p>
             </div>
         </div>
     );

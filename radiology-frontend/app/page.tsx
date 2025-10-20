@@ -32,11 +32,10 @@ export default function Home() {
 
     const handleJobCreated = useCallback((newJobId: string) => {
         setCurrentJobId(newJobId);
-        setProcessedImages([]); // Clear previous results
     }, []);
 
     const handleJobComplete = useCallback((images: string[]) => {
-        setProcessedImages(images);
+        setProcessedImages(prevImages => [...prevImages, ...images]);
     }, []);
 
     return (
@@ -55,7 +54,7 @@ export default function Home() {
                 {/* User ID Selector (for testing multi-user isolation) */}
                 <div className="mb-6 bg-white p-4 rounded-lg shadow">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        User ID (for testing isolation):
+                        User ID:
                     </label>
                     <input
                         type="text"
@@ -64,9 +63,6 @@ export default function Home() {
                         className="border rounded px-3 py-2 w-64"
                         placeholder="Enter user ID"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                        Change this to test multi-user isolation
-                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -99,7 +95,7 @@ export default function Home() {
                                     <p className="text-sm">Upload images to get started</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {processedImages.map((imagePath, index) => (
                                         <div key={index} className="border rounded p-4">
                                             <p className="text-sm text-gray-600 mb-2">
