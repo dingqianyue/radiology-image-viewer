@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 interface JobStatusProps {
@@ -22,9 +22,21 @@ export default function JobStatus({ jobId, userId, onComplete }: JobStatusProps)
     const [tasks, setTasks] = useState<TaskResult[]>([]);
     const [error, setError] = useState<string>('');
 
+    // Use a ref to safely control the polling loop
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
-        // Poll for job status every 2 seconds
-        const interval = setInterval(async () => {
+        // Reset state when jobId changes
+        setStatus('PENDING');
+        setProgress(0);
+        setTasks([]);
+        setError('');
+
+        let isMounted = true; // Track if component is mounted
+
+        const pollStatus = async () => {
+            if (!isMounted) return; // Stop if component unmounted
+
             try {
                 const response = await axios.get(
                     `http://localhost:8000/jobs/${jobId}`,
@@ -35,42 +47,57 @@ export default function JobStatus({ jobId, userId, onComplete }: JobStatusProps)
                     }
                 );
 
+                if (!isMounted) return; // Do not update state if unmounted
+
                 setStatus(response.data.status);
                 setProgress(response.data.progress);
                 setTasks(response.data.task_results || []);
 
                 // If job is complete, notify parent and stop polling
                 if (response.data.status === 'SUCCESS') {
-                    clearInterval(interval);
-
                     // Extract processed image URLs
                     const processedImages = response.data.task_results
                         .filter((task: TaskResult) => task.result?.output_file)
                         .map((task: TaskResult) => {
                             // Convert file path to URL
                             const filePath = task.result.output_file;
-                            // Extract user_id, job_id, filename from path
                             const parts = filePath.split('/');
                             const filename = parts[parts.length - 1];
+                            // Re-use userId and jobId for the URL
                             return `http://localhost:8000/files/${userId}/${jobId}/${filename}`;
                         });
 
                     onComplete(processedImages);
+                    // Stop polling by not setting another timeout
+
                 } else if (response.data.status === 'FAILED') {
-                    clearInterval(interval);
                     setError('Job failed. Please try again.');
+                    // Stop polling by not setting another timeout
+                } else {
+                    // Job is still running, poll again after 2 seconds
+                    timeoutRef.current = setTimeout(pollStatus, 2000);
                 }
             } catch (err: any) {
+                if (!isMounted) return; // Ignore errors if unmounted
+
                 console.error('Status polling error:', err);
                 if (err.response?.status === 404) {
                     setError('Job not found or access denied');
-                    clearInterval(interval);
+                    // Stop polling
                 }
             }
-        }, 2000);
+        };
+
+        // Start the first poll
+        pollStatus();
 
         // Cleanup
-        return () => clearInterval(interval);
+        return () => {
+            isMounted = false; // Mark as unmounted
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current); // Clear any pending timeout
+            }
+        };
     }, [jobId, userId, onComplete]);
 
     const getStatusColor = (status: string) => {

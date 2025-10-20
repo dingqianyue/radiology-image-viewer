@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import ImageUploader from './components/ImageUploader';
 import JobStatus from './components/JobStatus';
@@ -20,6 +20,15 @@ export default function Home() {
     const [currentJobId, setCurrentJobId] = useState<string>('');
     const [userId, setUserId] = useState<string>('user123'); // Simulate user ID
     const [processedImages, setProcessedImages] = useState<string[]>([]);
+
+    const handleJobCreated = useCallback((newJobId: string) => {
+        setCurrentJobId(newJobId);
+        setProcessedImages([]); // Clear previous results
+    }, []);
+
+    const handleJobComplete = useCallback((images: string[]) => {
+        setProcessedImages(images);
+    }, []);
 
     return (
         <main className="min-h-screen p-8 bg-gray-50">
@@ -56,14 +65,16 @@ export default function Home() {
                     <div className="space-y-6">
                         <ImageUploader
                             userId={userId}
-                            onJobCreated={setCurrentJobId}
+                            // Pass the stable function
+                            onJobCreated={handleJobCreated}
                         />
 
                         {currentJobId && (
                             <JobStatus
                                 jobId={currentJobId}
                                 userId={userId}
-                                onComplete={(images) => setProcessedImages(images)}
+                                // Pass the stable function
+                                onComplete={handleJobComplete}
                             />
                         )}
                     </div>
