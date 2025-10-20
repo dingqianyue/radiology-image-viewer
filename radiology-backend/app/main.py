@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Header, HTTPException
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from typing import List
@@ -102,6 +102,7 @@ async def root():
 @app.post("/jobs", response_model=JobResponse)
 async def create_job(
     files: List[UploadFile] = File(...),
+    task_type: str = Form("blur"),
     x_user_id: str = Header(..., description="User ID for multi-user isolation")
 ):
     """
@@ -134,8 +135,8 @@ async def create_job(
             logger.info(f"File saved successfully: {file_path}")
             
             # Submit Celery task for processing
-            logger.info(f"Submitting task for {file_path}")
-            task = process_image.delay(str(file_path), task_type="blur")
+            logger.info(f"Submitting task for {file_path} with task_type={task_type}")
+            task = process_image.delay(str(file_path), task_type=task_type)
             task_ids.append(task.id)
             logger.info(f"Task submitted with ID: {task.id}")
         

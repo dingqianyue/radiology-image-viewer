@@ -1,10 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import ImageUploader from './components/ImageUploader';
 import JobStatus from './components/JobStatus';
 import SimpleImageViewer from './components/SimpleImageViewer';
-import NiftiViewer from './components/NiftiViewer';
+
+// Dynamically import NiftiViewer and disable SSR
+const NiftiViewer = dynamic(() => import('./components/NiftiViewer'), {
+    ssr: false,
+    loading: () => (
+        <div className="text-center p-4 border rounded min-h-[200px] flex items-center justify-center">
+            <p className="text-gray-500">Loading 3D Viewer...</p>
+        </div>
+    ),
+});
 
 export default function Home() {
     const [currentJobId, setCurrentJobId] = useState<string>('');

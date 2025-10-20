@@ -8,10 +8,14 @@ interface ImageUploaderProps {
     onJobCreated: (jobId: string) => void;
 }
 
+// Define the available task types
+type TaskType = "blur" | "resize" | "grayscale";
+
 export default function ImageUploader({ userId, onJobCreated }: ImageUploaderProps) {
     const [files, setFiles] = useState<FileList | null>(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string>('');
+    const [taskType, setTaskType] = useState<TaskType>('blur');
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFiles(e.target.files);
@@ -34,6 +38,9 @@ export default function ImageUploader({ userId, onJobCreated }: ImageUploaderPro
             Array.from(files).forEach((file) => {
                 formData.append('files', file);
             });
+
+            // Add the selected task type to the form data
+            formData.append('task_type', taskType);
 
             // Upload to backend
             const response = await axios.post(
@@ -89,6 +96,24 @@ export default function ImageUploader({ userId, onJobCreated }: ImageUploaderPro
                     <p className="text-xs text-gray-500 mt-1">
                         Supported: PNG, JPG, DICOM (.dcm), NIfTI (.nii, .nii.gz)
                     </p>
+                </div>
+
+                {/* Task Type Selector */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select processing task
+                    </label>
+                    <select
+                        value={taskType}
+                        onChange={(e) => setTaskType(e.target.value as TaskType)}
+                        className="block w-full border-gray-300 rounded-md shadow-sm
+                                   focus:ring-blue-500 focus:border-blue-500
+                                   py-2 px-3 bg-white"
+                    >
+                        <option value="blur">Gaussian Blur</option>
+                        <option value="resize">Resize (512x512)</option>
+                        <option value="grayscale">Grayscale</option>
+                    </select>
                 </div>
 
                 {/* Selected files preview */}
