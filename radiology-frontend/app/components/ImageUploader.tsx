@@ -83,7 +83,7 @@ export default function ImageUploader({ userId, onJobCreated }: ImageUploaderPro
                         id="file-input"
                         type="file"
                         multiple
-                        accept=".png,.jpg,.jpeg,.dcm,.nii,.nii.gz"
+                        accept=".png,.jpg,.jpeg,.dcm,.nii,.nii.gz,.gz"
                         onChange={handleFileChange}
                         className="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4

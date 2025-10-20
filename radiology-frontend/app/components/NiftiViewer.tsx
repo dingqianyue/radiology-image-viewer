@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Niivue, NVImage } from '@niivue/niivue';
+import { Niivue } from '@niivue/niivue';
 
 interface NiftiViewerProps {
     fileUrl: string;
@@ -12,38 +12,47 @@ export default function NiftiViewer({ fileUrl }: NiftiViewerProps) {
     const nvRef = useRef<Niivue | null>(null);
 
     useEffect(() => {
-        if (!canvasRef.current) return;
+        let nv: Niivue | null = null; // Declare nv here to be accessible in cleanup
 
-        // Initialize Niivue
-        const nv = new Niivue({
-            backColor: [0, 0, 0, 1],
-            show3Dcrosshair: true,
-            onLocationChange: (data) => {
-                console.log('Location changed:', data);
-            }
-        });
+        if (canvasRef.current) {
+            nv = new Niivue({
+                backColor: [0, 0, 0, 1],
+                show3Dcrosshair: true,
+            });
 
-        nvRef.current = nv;
-        nv.attachToCanvas(canvasRef.current);
+            nvRef.current = nv;
+            nv.attachToCanvas(canvasRef.current);
 
-        // Load the NIfTI volume
-        const volumeList = [
-            {
-                url: fileUrl,
-                colormap: 'gray',
-                opacity: 1.0,
-            }
-        ];
+            const volumeList = [
+                {
+                    url: fileUrl,
+                    colormap: 'gray',
+                    opacity: 1.0,
+                }
+            ];
 
-        nv.loadVolumes(volumeList).catch((error) => {
-            console.error('Error loading NIfTI file:', error);
-        });
+            const loadVolume = async () => {
+                try {
+                    await nv?.loadVolumes(volumeList);
+                } catch (error) {
+                    console.error('Error loading NIfTI file:', error);
+                }
+            };
+            loadVolume();
+        }
 
-        // Cleanup
+        // Cleanup function
         return () => {
-            if (nvRef.current) {
-                nvRef.current.detachFromCanvas();
-                nvRef.current = null;
+            if (nvRef.current && typeof nvRef.current.destroy === 'function') {
+                try {
+                    nvRef.current.destroy();
+                    nvRef.current = null;
+                    console.log("Niivue instance destroyed");
+                } catch (error) {
+                    console.error("Error destroying Niivue instance:", error);
+                }
+            } else {
+                console.log("Niivue instance or destroy method not found for cleanup");
             }
         };
     }, [fileUrl]);
@@ -52,7 +61,7 @@ export default function NiftiViewer({ fileUrl }: NiftiViewerProps) {
         <div className="w-full">
             <canvas
                 ref={canvasRef}
-                className="border rounded w-full aspect-square"
+                className="border rounded w-full h-[600px]" // Set a fixed height
             />
             <div className="mt-2 text-sm text-gray-600">
                 <p>Tip: Click and drag to navigate through slices</p>

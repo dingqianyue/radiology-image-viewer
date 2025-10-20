@@ -38,6 +38,8 @@ A full-stack medical image processing platform that supports multi-modal medical
 - Celery (Distributed task queue)
 - Redis (Message broker & result backend)
 - Pillow (Image processing)
+- `pydicom` (DICOM file handling)
+- `numpy` (Numerical processing for DICOM)
 - Pydantic (Data validation)
 
 ---
