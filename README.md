@@ -70,11 +70,9 @@ radiology-image-viewer/
     │   ├── layout.tsx                 # Root layout
     │   ├── page.tsx                   # Main page
     │   └── globals.css                # Global styles
-    ├── public/                        # Static assets
     ├── next.config.js                 # Next.js configuration
     ├── package.json                   # Node dependencies
-    ├── tsconfig.json                  # TypeScript configuration
-    └── tailwind.config.ts             # Tailwind configuration
+    └── tsconfig.json                  # TypeScript configuration
 ```
 
 ---
@@ -121,7 +119,7 @@ pip install -r requirements.txt
 # Open a new terminal
 cd radiology-frontend
 
-# Install dependencies (this will take ~5 minutes, please be patient)
+# Install dependencies (this will take 5-10 minutes, please be patient)
 npm install
 ```
 
